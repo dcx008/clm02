@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.springboot.mapper.UserMapper">
+
+    <!--配置别名包 否则不生效-->
+    <insert id="addUser">
+        insert into user values(#{userId},#{username},#{password},#{level},#{state},#{verifycode})
+    </insert>
+
+    <select id="checkUsername" resultMap="userRM">
+        select * from user where username=#{username}
+    </select>
+
+    <select id="checkUser" resultMap="userRM">
+        select * from user
+        left join
+        user_info
+        on user.user_id=user_info.user_info_id
+        where username=#{username} and password=#{password}
+    </select>
+
+    <resultMap id="userRM" type="User" autoMapping="true">
+        <id column="user_id" property="userId"></id>
+        <association property="userInfo" javaType="UserInfo">
+            <id column="user_info_id" property="userInfoId"></id>
+            <result column="name" property="name"></result>
+            <result column="age" property="age"></result>
+            <result column="gender" property="gender"></result>
+            <result column="address" property="address"></result>
+            <result column="telephone" property="telephone"></result>
+            <result column="email" property="email"></result>
+        </association>
+    </resultMap>
+
+    <select id="findUserByVerifyCode" resultType="User">
+        select * from user where verifycode=#{verifycode}
+    </select>
+
+    <update id="changeState">
+        update user set state=1 where user_id=#{userId}
+    </update>
+
+    <select id="findPrililegeInfoList" resultType="string">
+        select level from user where user_id=#{userId};
+    </select>
+
+    <select id="getUserByUsername" resultType="User">
+        select * from user where username=#{username}
+    </select>
+</mapper>

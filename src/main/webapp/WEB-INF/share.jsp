@@ -1,0 +1,31 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: BIG
+  Date: 2017/10/22
+  Time: 17:50
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!-- JiaThis Button BEGIN -->
+<div class="jiathis_share_slide jiathis_share_32x32" id="jiathis_share_slide">
+    <div class="jiathis_share_slide_top" id="jiathis_share_title"></div>
+    <div class="jiathis_share_slide_inner">
+        <div class="jiathis_style_32x32">
+            <a class="jiathis_button_qzone"></a>
+            <a class="jiathis_button_tsina"></a>
+            <a class="jiathis_button_tqq"></a>
+            <a class="jiathis_button_weixin"></a>
+            <a class="jiathis_button_renren"></a>
+            <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+            <script type="text/javascript">
+                var jiathis_config = {
+                    slide:{
+                        divid:'jiathis_main',
+                        pos:'left'
+                    }
+                };
+            </script>
+            <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+            <script type="text/javascript" src="http://v3.jiathis.com/code/jiathis_slide.js" charset="utf-8"></script>
+        </div></div></div>
+<!-- JiaThis Button END -->

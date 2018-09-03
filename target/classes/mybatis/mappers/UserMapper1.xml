@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <mapper namespace="cn.tedu.springboot.mapper.UserMapper1">
+<select id="findAllUser" resultMap="u1">
+    SELECT * FROM
+    `user`
+    LEFT JOIN
+    user_info
+    on
+    `user`.user_id=user_info.user_info_id
+
+</select>
+    <resultMap id="u1" type="User" autoMapping="true">
+
+        <id column="user_id" property="userId"/>
+
+<association property="userInfo" javaType="UserInfo">
+
+    <id column="user_info_id" property="userInfoId"/>
+    <result column="address" property="address"/>
+    <result column="telephone" property="telephone"/>
+    <result column="gender" property="gender"/>
+    <result column="email" property="email"/>
+
+</association>
+    </resultMap>
+
+    <insert id="save">
+        insert into USER VALUES (
+        #{userId},
+        #{username},
+        #{password ,jdbcType=VARCHAR},
+        #{level ,jdbcType=INTEGER}
+        )
+
+    </insert>
+
+    <insert id="saveUserInfo">
+        INSERT INTO user_info VALUES (
+        #{userInfoId},
+        #{name,jdbcType=VARCHAR},
+        #{age ,jdbcType=INTEGER},
+        #{gender ,jdbcType=VARCHAR},
+        #{address ,jdbcType=VARCHAR},
+        #{telephone ,jdbcType=VARCHAR},
+        #{email ,jdbcType=VARCHAR}
+        )
+
+    </insert>
+
+    <delete id="memberDeleteAll">
+        DELETE from USER WHERE user_id IN (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+
+    </delete>
+
+    <delete id="memberDeleteAllUserInfo">
+        DELETE from user_info where user_info_id IN (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+
+    </delete>
+
+    <select id="searchMo" resultMap="u1">
+    SELECT * FROM
+    `user`
+    LEFT JOIN
+    user_info
+    on
+    `user`.user_id=user_info.user_info_id
+    WHERE
+        username LIKE concat(concat('%',#{keyword}),'%')
+        OR address LIKE concat(concat('%',#{keyword}),'%')
+        OR telephone LIKE concat(concat('%',#{keyword}),'%')
+    </select>
+
+    <select id="memberShow" resultMap="u1">
+    SELECT * FROM
+    `user`
+    LEFT JOIN
+    user_info
+    on
+    `user`.user_id=user_info.user_info_id
+    WHERE
+    user_id=#{idd}
+
+    </select>
+
+    <update id="memberUpdate">
+        UPDATE user
+        set
+            username=#{username},
+            level=#{level}
+            WHERE user_id=#{userId}
+    </update>
+
+    <update id="memberUpdateUserInfo">
+        UPDATE user_info
+        set
+            gender=#{gender},
+            address=#{address},
+            telephone=#{telephone},
+            email=#{email}
+
+        WHERE user_info_id=#{userInfoId}
+    </update>
+
+</mapper>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        <mapper namespace="cn.tedu.springboot.mapper.ProductMapper1">
+
+    <select id="findAll" resultType="Product">
+        SELECT * from product
+        LEFT JOIN
+      (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id
+    </select>
+
+    <select id="findOne" resultType="Product">
+       select * FROM
+        (SELECT * from product
+        LEFT JOIN
+        (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id) d
+        order by sum desc LIMIT 0,1
+    </select>
+
+    <select id="findCategoryAll" resultType="Product">
+      SELECT * from product
+        LEFT JOIN
+      (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id WHERE category =#{category}
+
+    </select>
+
+    <select id="findCategoryOne" resultType="Product">
+      select * FROM
+        (SELECT * from product
+        LEFT JOIN
+        (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id) d
+        WHERE category=#{category} order by sum desc LIMIT 0,1
+    </select>
+
+    <select id="search" resultType="Product">
+        SELECT * from product
+        <where>
+            <if test="category !=''">category like concat('%',#{category},'%')</if>
+            <if test="productName !=''">AND product_name like concat('%',#{productName},'%')</if>
+            <if test="minprice !=''">AND product_price &gt;= #{minprice}</if>
+            <if test="maxprice !=''">AND product_price &lt;= #{maxprice}</if>
+        </where>
+        LIMIT 0,8
+    </select>
+
+    <select id="searchOne" resultType="Product">
+
+        select * FROM
+        (SELECT * from product
+        LEFT JOIN
+        (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id) d
+        <where>
+        <if test="category !=''">category=#{category}</if>
+        <if test="productName !=''">AND product_name=#{productName}</if>
+        <if test="minprice !=''">AND product_price &gt;= #{minprice}</if>
+        <if test="maxprice !=''">AND product_price &lt;= #{maxprice}</if>
+        </where>
+        HAVING sum=MAX(sum) LIMIT 0,1
+
+    </select>
+
+    <select id="searchMo" resultType="Product">
+        SELECT * from product
+        LEFT JOIN
+        (SELECT product_id p_id,SUM(buynum) sum FROM `order_product` GROUP BY product_id ) p
+        on product_id=p.p_id
+        WHERE
+           category LIKE concat(concat('%',#{keyword}),'%')
+           OR product_name LIKE concat(concat('%',#{keyword}),'%')
+            OR description LIKE concat(concat('%',#{keyword}),'%')
+
+        ORDER BY sum DESC LIMIT 0,8
+
+    </select>
+
+    <select id="searchMoOne" resultType="Product">
+        select * FROM
+        (SELECT * from product
+        LEFT JOIN
+        (SELECT product_id p_id,SUM(buynum) sum FROM order_product GROUP BY product_id ) p
+        on product_id=p.p_id) d
+        WHERE
+            category LIKE concat(concat('%',#{keyword}),'%')
+           OR product_name LIKE concat(concat('%',#{keyword}),'%')
+           OR description LIKE concat(concat('%',#{keyword}),'%')
+
+        HAVING sum=MAX(sum) LIMIT 0,1
+
+    </select>
+
+    <select id="findProductById" resultType="Product">
+        select * from product where product_id=#{productId}
+    </select>
+
+    <insert id="addItemToShoppingCart">
+        insert into chart(user_id,product_id,buy_num) values(#{userId},#{productId},#{buynum})
+    </insert>
+
+    <select id="findAllProductInCartByUserId" resultMap="ProductRM">
+        select user_id,chart.product_id,sum(buy_num) buy_num,product_name,product_price,imgurl from chart
+        left join
+        product
+        on chart.product_id=product.product_id
+        where user_id=#{userId} group by chart.product_id
+    </select>
+
+    <resultMap id="ProductRM" type="Product" autoMapping="true">
+        <id column="product_id" property="productId"></id>
+    </resultMap>
+
+    <delete id="deleteProductInShoopingCartByProductId">
+        delete from chart where product_id=#{productId} and user_id=#{userId}
+    </delete>
+
+    <delete id="deleteAllProductInShoppingCartByUserId">
+        delete from chart where user_id=#{userId}
+    </delete>
+
+    <select id="findAllProductsByOrderId" resultMap="ProductRM">
+        select order_product.product_id,buynum,product_name,product_price,imgurl from order_product
+        left join
+        product
+        on
+        order_product.product_id=product.product_id
+        where order_id=#{orderId}
+    </select>
+
+</mapper>

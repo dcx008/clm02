@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.springboot.mapper.OrderMapper">
+
+   <insert id="addOrderIdAndProductId">
+       insert into order_product(order_id,product_id,buynum) values(#{orderId},#{productId},#{buynum})
+   </insert>
+
+    <insert id="addOrderInfo">
+        insert into orders(order_id,user_id,money,paystate,receive_info_id,order_time) values(#{orderId},#{userId},#{money},#{paystate},#{receiveInfo.receiveInfoId},#{orderTime})
+    </insert>
+
+    <select id="findOrdersByUserId" resultMap="orderRM">
+        select order_id,orders.user_id,money,paystate,orders.receive_info_id,order_time,receive_address,receiver,receive_telephone,receive_time from orders
+        left join
+        receive_info
+        on
+        orders.receive_info_id=receive_info.receive_info_id
+        where orders.user_id=#{userId}
+    </select>
+
+    <resultMap id="orderRM" type="Order" autoMapping="true">
+        <id column="order_id" property="orderId"></id>
+        <association property="receiveInfo" javaType="ReceiveInfo">
+            <id column="receive_info_id" property="receiveInfoId"></id>
+            <result column="receive_address" property="receiveAddress"></result>
+            <result column="receiver" property="receiver"></result>
+            <result column="receive_telephone" property="receiveTelephone"></result>
+            <result column="receive_time" property="receiveTime"></result>
+            <result column="user_id" property="userId"></result>
+        </association>
+    </resultMap>
+
+    <delete id="deleteOrderByOrderId">
+        delete from orders where order_id=#{orderId}
+    </delete>
+
+    <delete id="deleteOrderProductByOrderId">
+        delete from order_product where order_id=#{orderId}
+    </delete>
+
+</mapper>

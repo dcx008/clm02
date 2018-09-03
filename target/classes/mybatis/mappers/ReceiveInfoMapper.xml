@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.springboot.mapper.ReceiveInfoMapper">
+
+    <!--配置别名包 否则不生效-->
+    <insert id="addReceiveInfo">
+        insert into receive_info
+             <trim prefix="(" suffix=")" suffixOverrides=",">
+                 receive_info_id,
+                 user_id,
+                 <if test="receiveAddress!=null">receive_address,</if>
+                 <if test="receiver!=null">receiver,</if>
+                 <if test="receiveTelephone!=null">receive_telephone,</if>
+                 <if test="receiveTime!=null">receive_time,</if>
+                 <if test="postCode!=null">postcode</if>
+             </trim>
+         values
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{receiveInfoId},
+                #{userId},
+                <if test="receiveAddress!=null">#{receiveAddress},</if>
+                <if test="receiver!=null">#{receiver},</if>
+                <if test="receiveTelephone!=null">#{receiveTelephone},</if>
+                <if test="receiveTime!=null">#{receiveTime},</if>
+                <if test="postCode!=null">#{postCode}</if>
+            </trim>
+    </insert>
+
+    <select id="findAllReceiveInfoByUserId" resultType="ReceiveInfo">
+        select * from receive_info where user_id=#{userId}
+    </select>
+
+    <select id="findAllReceiveInfoByReceiveInfoId" resultType="ReceiveInfo">
+        select * from receive_info where receive_info_id=#{receiveInfoId}
+    </select>
+
+
+    <update id="updateUserNewReceiveInfo">
+        update receive_info
+        <set>
+          <if test="receiveAddress!=null">receive_address=#{receiveAddress},</if>
+          <if test="receiver!=null">receiver=#{receiver},</if>
+          <if test="receiveTelephone!=null">receive_telephone=#{receiveTelephone},</if>
+          <if test="receiveTime!=null">receive_time=#{receiveTime},</if>
+          <if test="postCode!=null">postcode=#{postCode}</if>
+        </set>
+        where
+        receive_info_id=#{receiveInfoId}
+    </update>
+
+    <delete id="deleteReceiveInfo">
+        delete from receive_info where receive_info_id=#{receiveInfoId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.springboot.mapper.BackMapper">
+
+    <select id="findAllProducts" resultType="Product">
+        select * from product
+    </select>
+
+    <select id="findProductById" resultType="Product">
+        select * from product where product_id=#{productId}
+    </select>
+
+    <insert id="addProduct">
+        insert into product values(
+        #{productId},
+        #{productName},
+        #{productPrice},
+        #{category},
+        #{imgurl},
+        #{pnum},
+        #{description,jdbcType=LONGVARBINARY},
+        #{remark,jdbcType=LONGVARBINARY}
+        )
+    </insert>
+
+    <delete id="productDel">
+        delete from product where product_id=#{productId}
+        <!-- <foreach collection="array" separator="," item="id">
+             #{id}
+         </foreach>
+         )-->
+
+    </delete>
+
+    <delete id="productDels">
+        delete from product where product_id in (
+        <foreach collection="array" separator="," item="id">
+            #{id}
+        </foreach>
+        )
+
+    </delete>
+
+    <update id="updateProduct">
+        update product
+        <set>
+            product_name=#{productName},
+            product_price=#{productPrice},
+            category=#{category},
+            imgurl=#{imgurl},
+            pnum=#{pnum},
+            <if test="description!=null">description=#{description,jdbcType=text},</if>
+            remark=#{remark}
+        </set>
+        where product_id=#{productId}
+    </update>
+
+    <select id="countProducts" resultType="Integer">
+        select count(*) from product
+    </select>
+
+    <select id="findAllSaleList" resultType="Product">
+        select * from
+        product p
+        left join
+        (select product_id o_id,sum(buynum) buynum from order_product GROUP BY product_id) o
+        on p.product_id=o.o_id
+        order by buynum desc
+    </select>
+
+
+    <!--配置别名包 否则不生效-->
+    <select id="findOrderList" resultMap="orderRM">
+        SELECT m.order_id,u.user_id,m.money,m.paystate,m.receive_info_id,m.order_time,m.receiver,m.receive_address FROM
+        (SELECT o.order_id,o.user_id,o.money,o.paystate,o.receive_info_id,o.order_time,r.receiver,r.receive_address from
+        `orders` o
+           LEFT JOIN
+        (SELECT receive_info_id,receiver,receive_address FROM receive_info)r
+        on o.receive_info_id = r.receive_info_id)m
+        LEFT JOIN
+        (SELECT * from `user`)u
+         on u.user_id = m.user_id
+    </select>
+
+    <resultMap id="orderRM" type="Order" autoMapping="true">
+        <id column="order_id" property="orderId"/>
+        <association property="receiveInfo" javaType="ReceiveInfo">
+            <id column="receive_info_id" property="receiveInfoId"/>
+            <result column="receive_address" property="receiveAddress"/>
+            <result column="receiver" property="receiver"/>
+        </association>
+        
+        <association property="user" javaType="User" resultMap="userRM">
+
+        </association>
+    </resultMap>
+
+    <resultMap id="userRM" type="User" autoMapping="true">
+        <id column="user_id" property="userId"></id>
+    </resultMap>
+
+    <delete id="deleteOrder">
+        delete from `orders` where order_id in (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="deleteOrderProduct">
+        delete from order_product where order_id in (
+        <foreach collection="array" item="id" separator=",">
+            #{id}
+        </foreach>)
+    </delete>
+
+    <update id="updateState" >
+        update `orders` set paystate = #{state} where order_id in (
+        <foreach collection="orderIds" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>
+
+    <select id="orderTotal" resultType="int">
+        select count(*) from `orders`
+    </select>
+
+    <select id="orderTotal2" resultType="int">
+        select count(*) from `orders` where paystate = #{payState}
+    </select>
+
+    <select id ="findOrderPayList" resultMap="orderRM">
+        select * from (
+        select m.order_id,u.user_id,m.money,m.paystate,m.receive_info_id,m.order_time,m.receiver,m.receive_address from
+        (select o.order_id,o.user_id,o.money,o.paystate,o.receive_info_id,o.order_time,r.receiver,r.receive_address from
+        `orders` o
+           left join
+        (select receive_info_id,receiver,receive_address from receive_info)r
+        on o.receive_info_id = r.receive_info_id)m
+        left join
+        (select * from `user`)u
+         on u.user_id = m.user_id)p
+         where p.paystate = #{payState}
+    </select>
+
+    <select id="findOrderByOrderId" resultMap="orderRM">
+            SELECT m.order_id,u.user_id,m.money,m.paystate,m.receive_info_id,m.order_time,m.receiver,m.receive_address FROM
+        (SELECT o.order_id,o.user_id,o.money,o.paystate,o.receive_info_id,o.order_time,r.receiver,r.receive_address from
+        `orders` o
+           LEFT JOIN
+        (SELECT receive_info_id,receiver,receive_address FROM receive_info)r
+        on o.receive_info_id = r.receive_info_id)m
+        LEFT JOIN
+        (SELECT * from `user`)u
+         on u.user_id = m.user_id
+         where m.order_id = #{orderId}
+    </select>
+
+    <select id="findOrderProducts" resultMap="productRM">
+        select p.product_id,p.product_name,p.product_price,p.category,op.buynum from
+        product p
+          LEFT JOIN
+        order_product op
+        on p.product_id = op.product_id
+        where op.order_id = #{orderId}
+    </select>
+
+    <resultMap id="productRM" type="Product">
+        <id column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="product_price" property="productPrice"/>
+        <result column="category" property="category"/>
+    </resultMap>
+
+    <select id="findOrder" resultMap="productRM">
+        select category,sum(buynum) buynum from
+        (select category,buynum from
+        (select product_id,buynum from order_product) o
+        left join product p on
+        o.product_id=p.product_id)t group by category  order by buynum desc
+    </select>
+</mapper>
